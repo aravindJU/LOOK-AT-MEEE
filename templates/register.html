@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LOOK AT ME // register</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="../static/css/style.css" />
+  <style>
+    :root { --bg:#0b0d0b; --panel:#141714; --text:#dfe6de; --dim:#7c8a7a; --locked:#3dff7a; --mono:'IBM Plex Mono','Courier New',monospace; }
+    * { box-sizing:border-box; }
+    html,body { min-height:100%; margin:0; background:var(--bg); color:var(--text); font-family:var(--mono); }
+    .auth-page { display:flex; flex-direction:column; align-items:center; padding:24px; }
+    .auth-header { width:min(100%,1100px); display:flex; align-items:baseline; justify-content:space-between; padding:0 4px 12px; border-bottom:1px solid #22271f; }
+    .rig-name { font-size:50px; letter-spacing:.04em; font-weight:700; }
+    .rig-model,.auth-subtitle { color:var(--dim); font-size:11px; }
+    .auth-card { width:min(100%,560px); margin-top:24px; padding:28px; background:var(--panel); border:1px solid #303830; border-radius:10px; }
+    .auth-form { display:grid; gap:12px; }
+    .auth-form input,.auth-form button,.auth-card>a { font:inherit; padding:11px; border-radius:4px; }
+    .auth-form input { color:var(--text); background:#090b09; border:1px solid #3b493b; }
+    .auth-form button,.auth-card>a { color:var(--locked); background:transparent; border:1px solid var(--locked); cursor:pointer; text-decoration:none; }
+    .auth-card>a { display:block; margin-top:12px; text-align:center; }
+    .auth-page-status { color:#ff5c5c; min-height:1em; }
+  </style>
 </head>
 <body class="auth-page">
   <header class="auth-header">
@@ -19,9 +35,9 @@
       <button type="submit">CREATE ACCOUNT</button>
     </form>
     <p id="authStatus" class="auth-page-status" aria-live="polite"></p>
-    <a href="/login">SIGN IN</a>
-    <a href="/">BACK TO MONITOR</a>
+    <a href="login.html">SIGN IN</a>
+    <a href="../index.html">BACK TO MONITOR</a>
   </main>
-  <script type="module" src="/static/js/auth.js"></script>
+  <script type="module" src="../static/js/auth.js"></script>
 </body>
 </html>

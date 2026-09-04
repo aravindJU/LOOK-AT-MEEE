@@ -10,7 +10,7 @@ import sqlite3
 import subprocess
 import tempfile
 
-from flask import Flask, jsonify, request, send_file, send_from_directory, abort, session
+from flask import Flask, jsonify, render_template, request, send_file, send_from_directory, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +19,7 @@ DATABASE = os.path.join(BASE_DIR, "meme_cam.db")
 # video meme here, and this gives the API and the browser one consistent path.
 MEMES_DIR = os.path.join(BASE_DIR, "static", "memes")
 
-ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4"}
+MEME_FILES = ("family-guy.mp4", "meme-1.mp4", "meme-2.mp4", "meme-3.mp4", "meme-4.mp4")
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = os.environ.get("MEME_CAM_SECRET", "local-development-secret")
@@ -65,35 +65,29 @@ init_db()
 
 
 def list_memes():
-    """Return the filenames of every valid meme image or video in MEMES_DIR."""
-    if not os.path.isdir(MEMES_DIR):
-        return []
-    return sorted(
-        f
-        for f in os.listdir(MEMES_DIR)
-        if os.path.isfile(os.path.join(MEMES_DIR, f))
-        and os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS
-    )
+    """Return the bundled meme videos in their playback order."""
+    return [
+        filename
+        for filename in MEME_FILES
+        if os.path.isfile(os.path.join(MEMES_DIR, filename))
+    ]
 
 
-@app.route("/")
+@app.get("/")
+@app.get("/index.html")
 def index():
+    """Serve the root monitor page from the project root."""
     return send_from_directory(BASE_DIR, "index.html")
 
 
-@app.route("/auth")
-def auth():
-    return send_from_directory(os.path.join(BASE_DIR, "templates"), "auth.html")
-
-
-@app.route("/login")
+@app.get("/login.html")
 def login_page():
-    return send_from_directory(os.path.join(BASE_DIR, "templates"), "login.html")
+    return render_template("login.html")
 
 
-@app.route("/register")
+@app.get("/register.html")
 def register_page():
-    return send_from_directory(os.path.join(BASE_DIR, "templates"), "register.html")
+    return render_template("register.html")
 
 
 @app.route("/api/random-meme")
@@ -111,7 +105,7 @@ def random_meme():
     playlist = [
         {
             "filename": meme,
-            "url": f"/memes/{meme}",
+            "url": f"/static/memes/{meme}",
             "type": "video" if meme.lower().endswith(".mp4") else "image",
         }
         for meme in memes
@@ -272,17 +266,6 @@ def delete_comment(comment_id):
     return jsonify({"message": "Comment deleted."})
 
 
-@app.route("/memes/<path:filename>")
-def serve_meme(filename):
-    """Serve an individual meme image, guarding against path traversal."""
-    safe_path = os.path.normpath(os.path.join(MEMES_DIR, filename))
-    if not safe_path.startswith(os.path.abspath(MEMES_DIR)):
-        abort(404)
-    if not os.path.isfile(safe_path):
-        abort(404)
-    return send_from_directory(MEMES_DIR, filename)
-
-
 if __name__ == "__main__":
     os.makedirs(MEMES_DIR, exist_ok=True)
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", "5001")))

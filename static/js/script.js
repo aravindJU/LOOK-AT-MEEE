@@ -22,6 +22,7 @@ const comments = document.getElementById("comments");
 const authBtn = document.getElementById("authBtn");
 const signedInPanel = document.getElementById("signedInPanel");
 const signedInAs = document.getElementById("signedInAs");
+const signInHint = document.getElementById("signInHint");
 const signOutBtn = document.getElementById("signOutBtn");
 const commentStatus = document.getElementById("commentStatus");
 const recordCanvas = document.createElement("canvas");
@@ -31,8 +32,8 @@ const errorText = document.getElementById("errorText");
 const statusSubject = document.getElementById("statusSubject");
 const statusCount = document.getElementById("statusCount");
 const statusUptime = document.getElementById("statusUptime");
-// Works through Flask and common project-root preview servers.
 const DEFAULT_VIDEO_MEMES = [
+  "./static/memes/family-guy.mp4",
   "./static/memes/meme-1.mp4",
   "./static/memes/meme-2.mp4",
   "./static/memes/meme-3.mp4",
@@ -91,7 +92,16 @@ recordBtn.addEventListener("click", startRecording);
 stopRecordBtn.addEventListener("click", stopRecording);
 commentForm.addEventListener("submit", addComment);
 signOutBtn.addEventListener("click", signOut);
-authBtn.addEventListener("click", () => { window.location.href = "/login"; });
+authBtn.addEventListener("click", () => {
+  if (window.location.protocol !== "file:") {
+    window.location.href = "/login.html";
+    return;
+  }
+  window.location.href = window.location.pathname.endsWith("/templates/index.html")
+    ? "login.html"
+    : "templates/login.html";
+});
+memeVideo.addEventListener("ended", playNextMeme);
 loadSession().finally(loadComments);
 window.addEventListener("beforeunload", stop);
 window.addEventListener("pagehide", stopCamera);
@@ -303,6 +313,13 @@ function playImageMeme() {
   statusCount.textContent = String(memeCount);
 }
 
+function playNextMeme() {
+  if (!memeVideo.classList.contains("active") || body.dataset.state !== "away") return;
+  showMeme(nextFallbackMeme());
+  memeCount += 1;
+  statusCount.textContent = String(memeCount);
+}
+
 function averageEyeGaze(landmarks) {
   const left = eyeGaze(landmarks, LEFT_EYE);
   const right = eyeGaze(landmarks, RIGHT_EYE);
@@ -415,6 +432,7 @@ function updateState(centred) {
 function stopMemeVideo() {
   memeVideo.pause();
   memeVideo.muted = true;
+  memeVideo.loop = false;
   memeVideo.classList.remove("active");
   try {
     memeVideo.currentTime = 0;
@@ -440,6 +458,7 @@ function showMeme(item) {
   memeImg.classList.remove("active");
   memeVideo.classList.remove("active");
   if (item.type === "video") {
+    memeVideo.loop = true;
     memeVideo.classList.add("active");
     if (memeVideo.dataset.source !== item.url) {
       memeVideo.pause();
@@ -447,19 +466,12 @@ function showMeme(item) {
       memeVideo.src = item.url;
       memeVideo.load();
     }
-    // Browsers allow muted autoplay even when the image was selected asynchronously.
-    memeVideo.muted = true;
-    memeVideo.volume = 1;
-    const playback = memeVideo.play();
-    if (playback) {
-      playback.then(() => {
-        memeVideo.muted = false;
-      }).catch(() => {});
-    }
+    playMemeVideoWhenReady();
     return;
   }
 
   memeVideo.pause();
+  memeVideo.loop = false;
   memeVideo.removeAttribute("src");
   memeVideo.dataset.source = "";
   memeImg.addEventListener("load", () => {
@@ -467,6 +479,26 @@ function showMeme(item) {
     body.dataset.memeReady = "true";
   }, { once: true });
   memeImg.src = item.url;
+}
+
+function playMemeVideoWhenReady() {
+  const play = () => {
+    memeVideo.muted = true;
+    memeVideo.volume = 1;
+    const playback = memeVideo.play();
+    if (playback) {
+      playback.then(() => {
+        memeVideo.muted = false;
+        body.dataset.memeReady = "true";
+      }).catch(() => {});
+    }
+  };
+
+  if (memeVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    play();
+  } else {
+    memeVideo.addEventListener("canplay", play, { once: true });
+  }
 }
 
 function nextFallbackMeme() {
@@ -601,17 +633,20 @@ async function finishRecording() {
   recordingStream = null;
   if (recordingUrl) URL.revokeObjectURL(recordingUrl);
   try {
-    recordStatus.textContent = "CONVERTING TO MP4…";
+    const recording = new Blob(recordingChunks, { type: "video/webm" });
     const formData = new FormData();
-    formData.append("recording", new Blob(recordingChunks, { type: "video/webm" }), "recording.webm");
-    const response = await fetch("/api/convert-recording", { method: "POST", body: formData });
-    const contentType = response.headers.get("content-type") || "";
-    if (!response.ok || !contentType.includes("video/mp4")) {
-      const data = contentType.includes("application/json") ? await response.json() : null;
-      throw new Error(data?.message || "MP4 conversion failed.");
+    formData.append("recording", recording, "look-at-me-recording.webm");
+    const response = await fetch("/api/convert-recording", {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || "MP4 CONVERSION FAILED");
     }
     recordingUrl = URL.createObjectURL(await response.blob());
     recordingDownload.href = recordingUrl;
+    recordingDownload.download = "look-at-me-recording.mp4";
     recordingDownload.classList.remove("hidden");
     recordStatus.textContent = "MP4 RECORDING READY";
   } catch (error) {
@@ -680,20 +715,21 @@ async function addComment(event) {
     await postComment(text);
     commentInput.value = "";
   } catch (error) {
-    commentStatus.textContent = error.message;
+    const message = error.message.toLowerCase();
+    commentStatus.textContent = message.includes("401") || message.includes("sign in")
+      ? "SIGN IN TO COMMENT"
+      : "";
   }
 }
 
 async function postComment(text, parentId = null) {
-  const comment = await apiJson("/api/comments", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, parent_id: parentId }),
-  });
+  if (!currentUsername) throw new Error("SIGN IN TO COMMENT");
+  const commentsData = JSON.parse(localStorage.getItem("look-at-me-comments") || "[]");
+  const comment = { id: Date.now(), text, parent_id: parentId, username: currentUsername };
+  commentsData.unshift(comment);
+  localStorage.setItem("look-at-me-comments", JSON.stringify(commentsData));
   commentsLoadToken += 1;
-  if (parentId === null) {
-    comments.prepend(createComment(comment, 0));
-  }
+  if (parentId === null) comments.prepend(createComment(comment, 0));
   return comment;
 }
 
@@ -701,7 +737,7 @@ function createComment(commentData, depth) {
   const comment = document.createElement("div");
   comment.className = "comment";
   comment.dataset.depth = String(depth);
-  comment.style.marginLeft = `${Math.min(depth, 8) * 20}px`;
+  comment.style.marginLeft = `${Math.min(depth, 8) * 32}px`;
   const content = document.createElement("span");
   content.textContent = `${commentData.username}: ${commentData.text}`;
   const actions = document.createElement("span");
@@ -714,10 +750,10 @@ function createComment(commentData, depth) {
     const text = window.prompt(`Reply to ${commentData.username}:`);
     if (!text?.trim()) return;
     try {
-      const reply = await postComment(text.trim(), commentData.id);
-      comment.after(createComment(reply, Number(comment.dataset.depth) + 1));
+      await postComment(text.trim(), commentData.id);
+      await loadComments();
     } catch (error) {
-      commentStatus.textContent = error.message;
+      commentStatus.textContent = "";
     }
   });
   actions.append(replyButton);
@@ -728,10 +764,12 @@ function createComment(commentData, depth) {
     deleteButton.textContent = "DELETE";
     deleteButton.addEventListener("click", async () => {
       try {
-        await apiJson(`/api/comments/${commentData.id}`, { method: "DELETE" });
+        const saved = JSON.parse(localStorage.getItem("look-at-me-comments") || "[]")
+          .filter((item) => item.id !== commentData.id);
+        localStorage.setItem("look-at-me-comments", JSON.stringify(saved));
         comment.remove();
       } catch (error) {
-        commentStatus.textContent = error.message;
+        commentStatus.textContent = "";
       }
     });
     actions.append(deleteButton);
@@ -741,78 +779,46 @@ function createComment(commentData, depth) {
 }
 
 async function loadComments() {
-  const requestToken = ++commentsLoadToken;
-  try {
-    const data = await apiJson("/api/comments");
-    if (requestToken !== commentsLoadToken) return;
-    comments.replaceChildren();
-    const byParent = new Map();
-    data.comments.forEach((comment) => {
-      const key = comment.parent_id ?? null;
-      if (!byParent.has(key)) byParent.set(key, []);
-      byParent.get(key).push(comment);
+  const data = JSON.parse(localStorage.getItem("look-at-me-comments") || "[]");
+  comments.replaceChildren();
+  const byParent = new Map();
+  data.forEach((comment) => {
+    const key = comment.parent_id ?? null;
+    if (!byParent.has(key)) byParent.set(key, []);
+    byParent.get(key).push(comment);
+  });
+  const render = (parentId, depth) => {
+    (byParent.get(parentId) || []).forEach((comment) => {
+      comments.append(createComment(comment, depth));
+      render(comment.id, depth + 1);
     });
-    const render = (parentId, depth) => {
-      (byParent.get(parentId) || []).forEach((comment) => {
-        comments.append(createComment(comment, depth));
-        render(comment.id, depth + 1);
-      });
-    };
-    render(null, 0);
-  } catch (error) {
-    commentStatus.textContent = error.message;
-  }
+  };
+  render(null, 0);
 }
 
 async function loadSession() {
-  try {
-    const data = await apiJson("/api/me");
-    if (data.username) {
-      updateAuthUi(data.username);
-      await migrateLegacyComments();
-    }
-  } catch (error) {
-    commentStatus.textContent = error.message;
-  }
-}
-
-async function migrateLegacyComments() {
-  const legacyKey = "meme-cam-comments";
-  const saved = localStorage.getItem(legacyKey);
-  if (!saved) return;
-  try {
-    const legacyComments = JSON.parse(saved);
-    if (Array.isArray(legacyComments)) {
-      for (const text of legacyComments) {
-        if (typeof text === "string" && text.trim()) {
-          await apiJson("/api/comments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: text.trim() }),
-          });
-        }
-      }
-    }
-    localStorage.removeItem(legacyKey);
-  } catch (error) {
-    commentStatus.textContent = error.message;
-  }
+  const username = localStorage.getItem("look-at-me-user");
+  if (username) updateAuthUi(username);
+  else commentStatus.textContent = "SIGN IN TO COMMENT";
 }
 
 function updateAuthUi(username) {
   currentUsername = username;
   authBtn.classList.add("hidden");
   signedInPanel.classList.remove("hidden");
+  signInHint.classList.add("hidden");
   signedInAs.textContent = `SIGNED IN AS ${username}`;
   commentStatus.textContent = "";
 }
 
 async function signOut() {
-  await apiJson("/api/logout", { method: "POST" });
+  localStorage.removeItem("look-at-me-user");
   currentUsername = null;
   authBtn.classList.remove("hidden");
   signedInPanel.classList.add("hidden");
+  signInHint.classList.remove("hidden");
   signedInAs.textContent = "";
+  commentStatus.textContent = "SIGN IN TO COMMENT";
 }
 
 async function apiJson(url, options) {
@@ -884,30 +890,8 @@ async function readJson(response) {
 }
 
 async function preloadMeme() {
-  try {
-    // Load the complete playlist once; transitions are then deterministic.
-    const response = await fetch("/api/random-meme?peek=1", { cache: "no-store" });
-    const data = await readJson(response);
-    if (!response.ok) throw new Error(data.message);
-    setFallbackPlaylist(data.playlist);
-    statusCount.title = `${fallbackVideos.length} memes in the folder`;
-    preloadMemeItem(fallbackVideos[0]);
-  } catch {
-    try {
-      const response = await fetch("./static/memes/manifest.json", { cache: "no-store" });
-      const files = await response.json();
-      setFallbackPlaylist(files.map((filename) => ({
-        url: `./static/memes/${encodeURIComponent(filename).replace(/%2F/g, "/")}`,
-        type: /\.(mp4|webm|ogg)$/i.test(filename) ? "video" : "image",
-      })));
-      statusCount.title = `${fallbackVideos.length} memes in the folder`;
-      preloadMemeItem(fallbackVideos[0]);
-    } catch {
-      // Keep the bundled fallback when neither the API nor the static manifest is available.
-      statusCount.title = `${fallbackVideos.length} memes in the folder`;
-      preloadMemeItem(fallbackVideos[0]);
-    }
-  }
+  statusCount.title = `${fallbackVideos.length} bundled memes`;
+  preloadMemeItem(fallbackVideos[0]);
 }
 
 function preloadMemeItem(item) {

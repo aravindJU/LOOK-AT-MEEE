@@ -540,6 +540,12 @@ body[data-camera-replaced="true"] .camera-btn { display: block; }
   overflow-wrap: anywhere;
 }
 
+.comment[data-depth]:not([data-depth="0"]) {
+  position: relative;
+  padding-left: 12px;
+  border-left: 2px solid #303830;
+}
+
 .comment-actions {
   display: flex;
   flex: 0 0 auto;
