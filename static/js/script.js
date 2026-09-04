@@ -633,24 +633,13 @@ async function finishRecording() {
   recordingStream = null;
   if (recordingUrl) URL.revokeObjectURL(recordingUrl);
   try {
-    const recording = new Blob(recordingChunks, { type: "video/webm" });
-    const formData = new FormData();
-    formData.append("recording", recording, "look-at-me-recording.webm");
-    const response = await fetch("/api/convert-recording", {
-      method: "POST",
-      body: formData,
-    });
-    if (!response.ok) {
-      const error = await response.json().catch(() => null);
-      throw new Error(error?.message || "MP4 CONVERSION FAILED");
-    }
-    recordingUrl = URL.createObjectURL(await response.blob());
+    recordingUrl = URL.createObjectURL(new Blob(recordingChunks, { type: "video/webm" }));
     recordingDownload.href = recordingUrl;
-    recordingDownload.download = "look-at-me-recording.mp4";
+    recordingDownload.download = "look-at-me-recording.webm";
     recordingDownload.classList.remove("hidden");
-    recordStatus.textContent = "MP4 RECORDING READY";
+    recordStatus.textContent = "WEBM RECORDING READY";
   } catch (error) {
-    recordStatus.textContent = error.message || "MP4 CONVERSION FAILED";
+    recordStatus.textContent = error.message || "WEBM RECORDING FAILED";
   } finally {
     recordBtn.disabled = false;
     mediaRecorder = null;
