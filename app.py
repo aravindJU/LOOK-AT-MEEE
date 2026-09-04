@@ -15,8 +15,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "meme_cam.db")
-# Keep media under Flask's static directory. The project already stores its
-# video meme here, and this gives the API and the browser one consistent path.
 MEMES_DIR = os.path.join(BASE_DIR, "static", "memes")
 
 MEME_FILES = ("family-guy.mp4", "meme-1.mp4", "meme-2.mp4", "meme-3.mp4", "meme-4.mp4")
@@ -42,18 +40,18 @@ def init_db():
         connection.executescript(
             """
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL
+                                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                 username TEXT NOT NULL UNIQUE,
+                                                 password_hash TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS comments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                text TEXT NOT NULL,
-                parent_id INTEGER,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            );
+                                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                    user_id INTEGER NOT NULL,
+                                                    text TEXT NOT NULL,
+                                                    parent_id INTEGER,
+                                                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                                    FOREIGN KEY (user_id) REFERENCES users (id)
+                );
             """
         )
         columns = {row["name"] for row in connection.execute("PRAGMA table_info(comments)")}
@@ -144,7 +142,9 @@ def convert_recording():
             )
         except FileNotFoundError:
             return jsonify({"error": "ffmpeg-unavailable", "message": "MP4 conversion is unavailable on this server."}), 503
+
         if conversion.returncode != 0:
+            print("FFMPEG STDERR:", conversion.stderr.decode("utf-8", errors="ignore"))
             conversion = subprocess.run(
                 [
                     "ffmpeg", "-y", "-i", source,
@@ -155,11 +155,14 @@ def convert_recording():
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
+
         if conversion.returncode != 0:
+            print("FFMPEG FALLBACK STDERR:", conversion.stderr.decode("utf-8", errors="ignore"))
             return jsonify({"error": "conversion-failed", "message": "The recording could not be converted to MP4."}), 422
 
         with open(output, "rb") as converted:
             data = converted.read()
+
     response = send_file(
         io.BytesIO(data),
         mimetype="video/mp4",
