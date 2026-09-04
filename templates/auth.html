@@ -3,29 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MEME-CAM // account</title>
+  <title>LOOK AT ME // account</title>
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body class="auth-page">
+  <header class="auth-header">
+    <span class="rig-name">LOOK AT ME</span>
+    <span class="rig-model">ACCOUNT ACCESS</span>
+  </header>
   <main class="auth-card">
-    <h1>MEME-CAM</h1>
     <p class="auth-subtitle">ACCOUNT ACCESS</p>
 
-    <form id="loginForm" class="auth-form">
-      <h2>SIGN IN</h2>
-      <input id="loginUsername" type="text" placeholder="Username" autocomplete="username" required />
-      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" required />
-      <button type="submit">SIGN IN</button>
-    </form>
-
-    <form id="registerForm" class="auth-form">
-      <h2>REGISTER</h2>
-      <input id="registerUsername" type="text" minlength="3" maxlength="30" placeholder="Username" autocomplete="username" required />
-      <input id="registerPassword" type="password" minlength="6" placeholder="Password" autocomplete="new-password" required />
-      <button type="submit">CREATE ACCOUNT</button>
-    </form>
-
-    <p id="authStatus" class="auth-page-status" aria-live="polite"></p>
+    <a href="/login">SIGN IN</a>
+    <a href="/register">REGISTER</a>
     <a href="/">BACK TO MONITOR</a>
   </main>
   <script type="module" src="/static/js/auth.js"></script>

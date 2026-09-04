@@ -2,8 +2,8 @@ const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
 const authStatus = document.getElementById("authStatus");
 
-loginForm.addEventListener("submit", (event) => submitAuth(event, "/api/login", "loginUsername", "loginPassword"));
-registerForm.addEventListener("submit", (event) => submitAuth(event, "/api/register", "registerUsername", "registerPassword"));
+loginForm?.addEventListener("submit", (event) => submitAuth(event, "/api/login", "loginUsername", "loginPassword"));
+registerForm?.addEventListener("submit", (event) => submitAuth(event, "/api/register", "registerUsername", "registerPassword"));
 
 async function submitAuth(event, endpoint, usernameId, passwordId) {
   event.preventDefault();
