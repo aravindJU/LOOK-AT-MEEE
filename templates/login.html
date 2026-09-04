@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEME-CAM // sign in</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="auth-page">
+  <main class="auth-card">
+    <h1>MEME-CAM</h1>
+    <p class="auth-subtitle">SIGN IN</p>
+    <form id="loginForm" class="auth-form">
+      <input id="loginUsername" type="text" placeholder="Username" autocomplete="username" required />
+      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit">SIGN IN</button>
+    </form>
+    <p id="authStatus" class="auth-page-status" aria-live="polite"></p>
+    <a href="/register">CREATE ACCOUNT</a>
+    <a href="/">BACK TO MONITOR</a>
+  </main>
+  <script type="module" src="/static/js/auth.js"></script>
+</body>
+</html>
