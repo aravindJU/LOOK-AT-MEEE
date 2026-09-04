@@ -33,10 +33,10 @@ const statusCount = document.getElementById("statusCount");
 const statusUptime = document.getElementById("statusUptime");
 // Works through Flask and common project-root preview servers.
 const DEFAULT_VIDEO_MEMES = [
-  "../static/memes/meme-1.mp4",
-  "../static/memes/meme-2.mp4",
-  "../static/memes/meme-3.mp4",
-  "../static/memes/meme-4.mp4",
+  "./static/memes/meme-1.mp4",
+  "./static/memes/meme-2.mp4",
+  "./static/memes/meme-3.mp4",
+  "./static/memes/meme-4.mp4",
 ];
 
 // 478-point Face Mesh eye landmarks: corners, lids, and the five iris points.
@@ -893,7 +893,20 @@ async function preloadMeme() {
     statusCount.title = `${fallbackVideos.length} memes in the folder`;
     preloadMemeItem(fallbackVideos[0]);
   } catch {
-    // Keep the local fallback when the API is unavailable.
+    try {
+      const response = await fetch("./static/memes/manifest.json", { cache: "no-store" });
+      const files = await response.json();
+      setFallbackPlaylist(files.map((filename) => ({
+        url: `./static/memes/${encodeURIComponent(filename).replace(/%2F/g, "/")}`,
+        type: /\.(mp4|webm|ogg)$/i.test(filename) ? "video" : "image",
+      })));
+      statusCount.title = `${fallbackVideos.length} memes in the folder`;
+      preloadMemeItem(fallbackVideos[0]);
+    } catch {
+      // Keep the bundled fallback when neither the API nor the static manifest is available.
+      statusCount.title = `${fallbackVideos.length} memes in the folder`;
+      preloadMemeItem(fallbackVideos[0]);
+    }
   }
 }
 
