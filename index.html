@@ -4,99 +4,89 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LOOK AT ME // attention monitor</title>
-<<<<<<< HEAD
-  <link rel="stylesheet" href="/css/style.css" />
-=======
-  <!-- Replace LOOK-AT-ME with your exact GitHub repository name -->
-  <base href="/LOOK-AT-ME/">
-  <link rel="stylesheet" href="static/css/style.css" />
->>>>>>> 0bdd07e7101d0d99e517abba961256798c25454f
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body data-state="idle">
 
-  <main class="rig">
-    <header class="rig-header">
-      <span class="rig-name">LOOK AT ME</span>
-      <span class="rig-model">MODEL 7-G // ATTENTION MONITOR</span>
-    </header>
+<main class="rig">
+  <header class="rig-header">
+    <span class="rig-name">LOOK AT ME</span>
+    <span class="rig-model">MODEL 7-G // ATTENTION MONITOR</span>
+  </header>
 
-    <div class="monitor" id="monitor">
-      <div class="screen">
-        <video id="webcam" autoplay playsinline muted></video>
-        <canvas id="overlay"></canvas>
-        <video id="memeVideo" playsinline loop preload="metadata"></video>
-        <img id="meme" alt="A meme, because you looked away." />
+  <div class="monitor" id="monitor">
+    <div class="screen">
+      <video id="webcam" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <video id="memeVideo" playsinline loop preload="metadata"></video>
+      <img id="meme" alt="A meme, because you looked away." />
 
-        <div class="scanlines" aria-hidden="true"></div>
-        <div class="vignette" aria-hidden="true"></div>
+      <div class="scanlines" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
 
-        <div class="boot-panel" id="bootPanel">
-          <p class="boot-line">CAMERA FEED: <span class="blink">OFFLINE</span></p>
-          <button id="startBtn" class="power-btn" type="button">POWER ON</button>
-          <p class="boot-hint">Requires camera access. Nothing leaves your browser.</p>
-        </div>
-
-        <div class="error-panel hidden" id="errorPanel">
-          <p id="errorText">Something went wrong.</p>
-        </div>
+      <div class="boot-panel" id="bootPanel">
+        <p class="boot-line">CAMERA FEED: <span class="blink">OFFLINE</span></p>
+        <button id="startBtn" class="power-btn" type="button">POWER ON</button>
+        <p class="boot-hint">Requires camera access. Nothing leaves your browser.</p>
       </div>
 
-      <div class="bezel-label">REC <span class="rec-dot" id="recDot"></span></div>
-    </div>
-
-    <div class="statusbar">
-      <div class="status-item">
-        <span class="status-key">SUBJECT</span>
-        <span class="status-val" id="statusSubject">—</span>
-      </div>
-      <div class="status-item">
-        <span class="status-key">MEME COUNT</span>
-        <span class="status-val" id="statusCount">0</span>
-      </div>
-      <div class="status-item">
-        <span class="status-key">UPTIME</span>
-        <span class="status-val" id="statusUptime">00:00</span>
+      <div class="error-panel hidden" id="errorPanel">
+        <p id="errorText">Something went wrong.</p>
       </div>
     </div>
 
-    <form id="uploadForm" class="upload-form">
-      <label for="imageUpload">ADD AN IMAGE</label>
-      <input id="imageUpload" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required />
-      <button id="clearImageBtn" class="camera-btn" type="button">USE CAMERA</button>
-      <button id="turnOffCameraBtn" class="turn-off-camera-btn" type="button">TURN OFF CAMERA</button>
-      <p id="uploadStatus" class="upload-status" aria-live="polite"></p>
+    <div class="bezel-label">REC <span class="rec-dot" id="recDot"></span></div>
+  </div>
+
+  <div class="statusbar">
+    <div class="status-item">
+      <span class="status-key">SUBJECT</span>
+      <span class="status-val" id="statusSubject">—</span>
+    </div>
+    <div class="status-item">
+      <span class="status-key">MEME COUNT</span>
+      <span class="status-val" id="statusCount">0</span>
+    </div>
+    <div class="status-item">
+      <span class="status-key">UPTIME</span>
+      <span class="status-val" id="statusUptime">00:00</span>
+    </div>
+  </div>
+
+  <form id="uploadForm" class="upload-form">
+    <label for="imageUpload">ADD AN IMAGE</label>
+    <input id="imageUpload" type="file" accept="image/png,image/jpeg,image/gif,image/webp" required />
+    <button id="clearImageBtn" class="camera-btn" type="button">USE CAMERA</button>
+    <button id="turnOffCameraBtn" class="turn-off-camera-btn" type="button">TURN OFF CAMERA</button>
+    <p id="uploadStatus" class="upload-status" aria-live="polite"></p>
+  </form>
+
+  <section class="tools" aria-label="Recording and comments">
+    <div class="record-controls">
+      <button id="recordBtn" type="button">START RECORDING</button>
+      <button id="stopRecordBtn" type="button" disabled>STOP RECORDING</button>
+      <a id="recordingDownload" class="hidden" download="meme-cam-recording.mp4">DOWNLOAD RECORDING (MP4)</a>
+      <p id="recordStatus" aria-live="polite"></p>
+    </div>
+    <form id="commentForm" class="comment-form">
+      <div id="accountPanel">
+        <button id="authBtn" type="button">SIGN IN / REGISTER</button>
+        <div id="signedInPanel" class="hidden">
+          <span id="signedInAs"></span>
+          <button id="signOutBtn" type="button">SIGN OUT</button>
+        </div>
+      </div>
+      <label for="commentInput">COMMENTS</label>
+      <textarea id="commentInput" rows="2" maxlength="500" placeholder="Add a comment..."></textarea>
+      <button id="commentBtn" type="submit">ADD COMMENT</button>
+      <p id="commentStatus" aria-live="polite"></p>
+      <div id="comments" class="comments" aria-live="polite"></div>
     </form>
+  </section>
 
-    <section class="tools" aria-label="Recording and comments">
-      <div class="record-controls">
-        <button id="recordBtn" type="button">START RECORDING</button>
-        <button id="stopRecordBtn" type="button" disabled>STOP RECORDING</button>
-        <a id="recordingDownload" class="hidden" download="meme-cam-recording.mp4">DOWNLOAD RECORDING (MP4)</a>
-        <p id="recordStatus" aria-live="polite"></p>
-      </div>
-      <form id="commentForm" class="comment-form">
-        <div id="accountPanel">
-          <button id="authBtn" type="button">SIGN IN / REGISTER</button>
-          <div id="signedInPanel" class="hidden">
-            <span id="signedInAs"></span>
-            <button id="signOutBtn" type="button">SIGN OUT</button>
-          </div>
-        </div>
-        <label for="commentInput">COMMENTS</label>
-        <textarea id="commentInput" rows="2" maxlength="500" placeholder="Add a comment..."></textarea>
-        <button id="commentBtn" type="submit">ADD COMMENT</button>
-        <p id="commentStatus" aria-live="polite"></p>
-        <div id="comments" class="comments" aria-live="polite"></div>
-      </form>
-    </section>
+  <p class="footnote">Look at the lens to stay on camera. Look away and the reel starts.</p>
+</main>
 
-    <p class="footnote">Look at the lens to stay on camera. Look away and the reel starts.</p>
-  </main>
-
-<<<<<<< HEAD
-  <script type="module" src="/js/script.js"></script>
-=======
-  <script type="module" src="static/js/script.js"></script>
->>>>>>> 0bdd07e7101d0d99e517abba961256798c25454f
+<script type="module" src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
