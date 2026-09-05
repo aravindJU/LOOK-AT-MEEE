@@ -68,11 +68,11 @@ Webcam feed
 
 <img width="1121" height="493" alt="Screenshot 2026-09-05 at 5 25 58 AM" src="https://github.com/user-attachments/assets/10ea479b-f1a6-4880-ba0e-b99427ec2477" />
 
-Meme
+MemeOther Features
 
 <img width="1470" height="956" alt="Screenshot 2026-09-05 at 5 25 26 AM" src="https://github.com/user-attachments/assets/0eabf5e4-1ad7-4208-ad42-7b695965fcfc" />
 
-Other Features
+Meme
 
 
 
