@@ -4,7 +4,7 @@
 
 ## Basic Details
 
-### Team Name: Panineer nilaavin poomazha
+### Team Name: FaceFun
 
 ### Team Members
 
