@@ -95,9 +95,7 @@ graph TD
 
 # Video
 
-
-
-https://github.com/user-attachments/assets/4a341eb9-1e2a-43af-9124-253967978138
+(https://drive.google.com/drive/folders/1EtyafUJLdagZWJVr1jnwH9DDoDbYcck2)
 
 This a user demo on how to use the website
 
