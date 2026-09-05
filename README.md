@@ -1,6 +1,6 @@
 ![](https://github.com/user-attachments/assets/8920b256-2ba8-4988-b824-5351134eb4bd "git (1)")
 
-# ConvincingStarAI 🎯
+# LOOK AT ME 🎯
 
 ## Basic Details
 
@@ -12,37 +12,28 @@
 
 ### Project Description
 
-\[2-3 lines about what your project does\]
+This project is an attention-monitoring web app that uses your webcam to track whether you are looking at the screen. If you look away, it interrupts you with a meme reel, counts your distractions, and lets you record and download your session.
 
 ### The Problem (that doesn't exist)
 
-\[What ridiculous problem are you solving?\]
+The terrifying productivity crisis of eyes accidentally blinking, resting, or looking at a window instead of staring unblinkingly at a glowing rectangle for eight straight hours.
 
 ### The Solution (that nobody asked for)
 
-\[How are you solving it? Keep it fun!\]
+A magic laser beam that glues your eyeballs straight ahead and shoots funny pictures into your eyes whenever you try to look away.
 
 ## Technical Details
 
-### Technologies/Components Used
+### Technologies Used
 
-For Software:
+- Languages used: Python, HTML, CSS, JavaScript
 
-- \[Languages used\]
+- Frameworks used: Flask, Jinja2
 
-- \[Frameworks used\]
+- Libraries used: MediaPipe (for face/gaze tracking), Werkzeug, standard Python libraries (io, os, sqlite3, subprocess, tempfile)
 
-- \[Libraries used\]
+- Tools used: Render, Git, FFmpeg
 
-- \[Tools used\]
-
-For Hardware:
-
-- \[List main components\]
-
-- \[List specifications\]
-
-- \[List tools required\]
 
 ### Implementation
 
@@ -62,8 +53,8 @@ python -m pip install -r requirements.txt
 python app.py
 ```
 
-Open http://127.0.0.1:5001 in a browser. On Windows, activate the environment with
-`venv\Scripts\activate` instead.
+Open http://127.0.0.1:5001 in a browser. On Mac/Linux, activate the environment with
+`source venv\bin\activate` instead.
 
 ### Project Documentation
 
@@ -71,49 +62,50 @@ For Software:
 
 # Screenshots (Add at least 3)
 
-!\[Screenshot1\](Add screenshot 1 here with proper name) *Add caption explaining what this shows*
+<img width="1470" height="956" alt="Screenshot 2026-09-05 at 5 25 17 AM" src="https://github.com/user-attachments/assets/b0d4b8bb-c07b-4130-af24-355b20dfcf88" />
 
-!\[Screenshot2\](Add screenshot 2 here with proper name) *Add caption explaining what this shows*
+Webcam feed
 
-!\[Screenshot3\](Add screenshot 3 here with proper name) *Add caption explaining what this shows*
+<img width="1121" height="493" alt="Screenshot 2026-09-05 at 5 25 58 AM" src="https://github.com/user-attachments/assets/10ea479b-f1a6-4880-ba0e-b99427ec2477" />
+
+Meme
+
+<img width="1470" height="956" alt="Screenshot 2026-09-05 at 5 25 26 AM" src="https://github.com/user-attachments/assets/0eabf5e4-1ad7-4208-ad42-7b695965fcfc" />
+
+Other Features
+
+
 
 # Diagrams
+graph TD
+    A[User Opens App / Index] --> B{Logged In?}
+    B -->|No| C[Login / Register Page]
+    C --> D[Authenticate via SQLite DB]
+    D --> A
+    B -->|Yes| E[Main Application Dashboard]
+    E --> F[Webcam Stream & YOLO Pose Detection]
+    F -->|Distraction Detected| G[Trigger Meme Interruption Video]
+    G --> E
+    F -->|User Clicks Download| H[Backend Python & FFmpeg Process MP4]
+    H --> I[Download MP4 to Local Device]
 
-!\[Workflow\](Add your workflow/architecture diagram here) *Add caption explaining your workflow*
 
-For Hardware:
-
-# Schematic & Circuit
-
-!\[Circuit\](Add your circuit diagram here) *Add caption explaining connections*
-
-!\[Schematic\](Add your schematic diagram here) *Add caption explaining the schematic*
-
-# Build Photos
-
-!\[Components\](Add photo of your components here) *List out all components shown*
-
-!\[Build\](Add photos of build process here) *Explain the build steps*
-
-!\[Final\](Add photo of final product here) *Explain the final build*
 
 ### Project Demo
 
 # Video
 
-\[Add your demo video link here\] *Explain what the video demonstrates*
 
-# Additional Demos
 
-\[Add any extra demo materials/links\]
+https://github.com/user-attachments/assets/4a341eb9-1e2a-43af-9124-253967978138
+
+This a user demo on how to use the website
+
+
 
 ## Team Contributions
 
-- \[Name 1\]: \[Specific contributions\]
-
-- \[Name 2\]: \[Specific contributions\]
-
-- \[Name 3\]: \[Specific contributions\]
+- Aravind - Designed and Coded the Entire Project
 
 
 Made with ❤️ at TinkerHub Useless Projects
